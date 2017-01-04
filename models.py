@@ -64,7 +64,7 @@ def LeNetDrop(x, keep_prob):
     conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, x._shape[-1].value, 6), mean = mu, stddev = sigma))
     conv1_b = tf.Variable(tf.zeros(6))
     conv1   = tf.nn.conv2d(x, conv1_W, strides=[1, 1, 1, 1], padding='VALID') + conv1_b
-    conv1   = tf.nn.dropout(conv1, keep_prob[0])
+    #conv1   = tf.nn.dropout(conv1, keep_prob[0])
 
     # Activation.
     conv1 = tf.nn.relu(conv1)
@@ -76,7 +76,7 @@ def LeNetDrop(x, keep_prob):
     conv2_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 6, 16), mean = mu, stddev = sigma))
     conv2_b = tf.Variable(tf.zeros(16))
     conv2   = tf.nn.conv2d(conv1, conv2_W, strides=[1, 1, 1, 1], padding='VALID') + conv2_b
-    conv2   = tf.nn.dropout(conv2, keep_prob[1])
+    #conv2   = tf.nn.dropout(conv2, keep_prob[1])
     # Activation.
     conv2 = tf.nn.relu(conv2)
 
@@ -90,7 +90,7 @@ def LeNetDrop(x, keep_prob):
     fc1_W = tf.Variable(tf.truncated_normal(shape=(400, 120), mean = mu, stddev = sigma))
     fc1_b = tf.Variable(tf.zeros(120))
     fc1   = tf.matmul(fc0, fc1_W) + fc1_b
-
+    fc1   = tf.nn.dropout(fc1, keep_prob[0])
     # Activation.
     fc1    = tf.nn.relu(fc1)
 
@@ -98,7 +98,7 @@ def LeNetDrop(x, keep_prob):
     fc2_W  = tf.Variable(tf.truncated_normal(shape=(120, 84), mean = mu, stddev = sigma))
     fc2_b  = tf.Variable(tf.zeros(84))
     fc2    = tf.matmul(fc1, fc2_W) + fc2_b
-
+    fc2   = tf.nn.dropout(fc2, keep_prob[1])
     # Activation.
     fc2    = tf.nn.relu(fc2)
 

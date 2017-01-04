@@ -19,3 +19,6 @@ Number of classes = 43
 - Implemented dropout layers after conv2d layers. It rarely improved the test accuracy although it improved the signs of overfitting (I printed train & validation loss for each epoch).
 - Color and grayscales were skewed. Implemented equalizeHist to each channel. It improved test accuracy by 4% on plain LeNet, while it doesn't overfit as much.
 - Maybe I'll try putting dropouts in the FC layer(s) instead.
+
+#### Day 3
+- Dropout layers on fc1 and fc2 instead conv layers. It surely less overfit, but it alone doesn't improve test accuracy. Long epoch at slow lr had very little improvement.
