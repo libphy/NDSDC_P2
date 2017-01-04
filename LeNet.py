@@ -76,6 +76,7 @@ def evaluate(X_data, y_data):
         total_accuracy += (accuracy * len(batch_x))
     return total_accuracy / num_examples
 
+
 if __name__ == '__main__':
 # Data import
     wdir = os.getcwd()
@@ -139,9 +140,10 @@ if __name__ == '__main__':
                 sess.run(training_operation, feed_dict={x: batch_x, y: batch_y})
 
             validation_accuracy = evaluate(X_Val, y_Val)
+            #validation_loss =
             print("EPOCH {} ...".format(i+1))
             print("Validation Accuracy = {:.3f}".format(validation_accuracy))
             print()
 
-        saver.save(sess, 'lenet')
-        print("Model saved")
+        # saver.save(sess, 'lenet')
+        # print("Model saved")

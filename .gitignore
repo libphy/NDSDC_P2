@@ -1,10 +1,13 @@
 data
 .ipynb_checkpoints
 *.h5
-models
 *.swp
 *.p
 *.zip
 udacity
-.lenet.*
 note.md
+*.pyc
+*.index
+*.meta
+*.data-00000-of-00001
+checkpoint
