@@ -1,6 +1,5 @@
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
-import settings
 
 
 def LeNet(x):
@@ -9,7 +8,7 @@ def LeNet(x):
     sigma = 0.1
 
     # Layer 1: Convolutional. Input = 32x32x3. Output = 28x28x6.
-    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 3, 6), mean = mu, stddev = sigma))
+    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, x._shape[-1].value, 6), mean = mu, stddev = sigma))
     conv1_b = tf.Variable(tf.zeros(6))
     conv1   = tf.nn.conv2d(x, conv1_W, strides=[1, 1, 1, 1], padding='VALID') + conv1_b
 
@@ -56,16 +55,16 @@ def LeNet(x):
 
     return logits
 
-def LeNetDrop(x):
+def LeNetDrop(x, keep_prob):
     # Hyperparameters
     mu = 0
     sigma = 0.1
 
     # Layer 1: Convolutional. Input = 32x32x3. Output = 28x28x6.
-    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 3, 6), mean = mu, stddev = sigma))
+    conv1_W = tf.Variable(tf.truncated_normal(shape=(5, 5, x._shape[-1].value, 6), mean = mu, stddev = sigma))
     conv1_b = tf.Variable(tf.zeros(6))
     conv1   = tf.nn.conv2d(x, conv1_W, strides=[1, 1, 1, 1], padding='VALID') + conv1_b
-    conv1   = tf.nn.dropout(conv1, settings.keep_prob)
+    conv1   = tf.nn.dropout(conv1, keep_prob[0])
 
     # Activation.
     conv1 = tf.nn.relu(conv1)
@@ -77,7 +76,7 @@ def LeNetDrop(x):
     conv2_W = tf.Variable(tf.truncated_normal(shape=(5, 5, 6, 16), mean = mu, stddev = sigma))
     conv2_b = tf.Variable(tf.zeros(16))
     conv2   = tf.nn.conv2d(conv1, conv2_W, strides=[1, 1, 1, 1], padding='VALID') + conv2_b
-    conv2   = tf.nn.dropout(conv2, settings.keep_prob)
+    conv2   = tf.nn.dropout(conv2, keep_prob[1])
     # Activation.
     conv2 = tf.nn.relu(conv2)
 

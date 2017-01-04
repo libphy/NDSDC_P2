@@ -1,3 +1,4 @@
+import preprocess
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
@@ -6,11 +7,10 @@ import pickle
 from sklearn.cross_validation import train_test_split
 from sklearn.utils import shuffle
 from models import *
-import preprocess
-import settings
+
 
 global  dropoutD
-settings.init()
+
 
 def evaluate(X_data, y_data):
     num_examples = len(X_data)
@@ -61,29 +61,29 @@ if __name__ == '__main__':
     print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
 
 # preprocess
-    X0 = preprocess.basic(X_train)
-    X1 = preprocess.basic(X_test)
+    X0 = preprocess.eqhGray(X_train)
+    X1 = preprocess.eqhGray(X_test)
     print("Data preprocess done.")
 
 # train, validation, test sets
-    X_Train, X_Val, y_Train, y_Val = train_test_split(X_train, y_train, test_size=0.2, random_state=123)
-    X_Test, y_Test = shuffle(X_test, y_test, random_state=123)
+    X_Train, X_Val, y_Train, y_Val = train_test_split(X0, y_train, test_size=0.2, random_state=123)
+    X_Test, y_Test = shuffle(X1, y_test, random_state=123)
     print("Train, Validation, and Test set ready.")
     print(len(y_train), len(y_Val), len(y_Test))
 
 # Train pipeline
-    EPOCHS = 10
+    EPOCHS = 30
     BATCH_SIZE = 128
-    rate = 0.001
-    dropoutD=[0.5,1] # dropout keep rate for the layers
+    rate = 0.002
+    dropoutD=[0.75,0.75] # dropout keep rate for the layers
 
     # placeholders
-    x = tf.placeholder(tf.float32, (None, 32, 32, 3))
+    x = tf.placeholder(tf.float32, (None, 32, 32, X_Train.shape[-1]))
     y = tf.placeholder(tf.int32, (None))
     keep_prob = tf.placeholder(tf.float32, (None))
     one_hot_y = tf.one_hot(y, 43)
 
-    logits = LeNetDrop(x)
+    logits = LeNetDrop(x, dropoutD) #LeNet(x)
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
     loss_operation = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.AdamOptimizer(learning_rate = rate)

@@ -9,9 +9,13 @@ Number of testing examples = 12630
 Image data shape = (32, 32, 3) *e.g. X_train.shape = (39209,32,32,3)*
 Number of classes = 43
 
-## Preparation
+## Experiment results
+#### Day 1
 - simple pre-process (X-X_mean_channel)/255 for each channel
 - set aside validation data from training data (train:val = 0.8:0.2)
+- I used the plain LeNet (introduced in the class exercise), but got a result that it overfits. (96% validation accuracy, then 88% test accuracy) It seems it needs regularization/dropouts or a change in structure.
 
-## Experiment results
-I used the plain LeNet (introduced in the class exercise), but got a result that it overfits. (96% validation accuracy, then 88% test accuracy) It seems it needs regularization/dropouts or a change in structure.
+#### Day 2
+- Implemented dropout layers after conv2d layers. It rarely improved the test accuracy although it improved the signs of overfitting (I printed train & validation loss for each epoch).
+- Color and grayscales were skewed. Implemented equalizeHist to each channel. It improved test accuracy by 4% on plain LeNet, while it doesn't overfit as much.
+- Maybe I'll try putting dropouts in the FC layer(s) instead.
