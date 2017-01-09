@@ -7,7 +7,7 @@ import pickle
 from sklearn.cross_validation import train_test_split
 from sklearn.utils import shuffle
 from models import *
-
+import moredata
 
 global  dropoutD
 
@@ -38,16 +38,17 @@ def training(X_data, y_data):
         total_loss += (loss * len(batch_x))
     return total_loss / num_examples
 
-def finaltest(X_data, y_data):
-    with tf.Session() as sess:
-        saver.restore(sess, tf.train.latest_checkpoint('.'))
-        test_accuracy, _ = evaluate(X_data, y_data)
-        print("Test Accuracy = {:.3f}".format(test_accuracy))
+def saveaug(wdir, filename, X, y):
+    data={}
+    data['features'] = X
+    data['labels'] = y
+    with open(wdir+'/data/'+filename+'.p','wb') as f:
+        pickle.dump(data, f)
 
 if __name__ == '__main__':
 # Data import
     wdir = os.getcwd()
-    training_file = wdir+'/data/train.p'
+    training_file = wdir+'/data/train_aug_2000_2.p'
     testing_file = wdir+'/data/test.p'
 
     with open(training_file, mode='rb') as f:
@@ -58,8 +59,11 @@ if __name__ == '__main__':
     X_train, y_train = train['features'], train['labels']
     X_test, y_test = test['features'], test['labels']
     print("Import data")
-    print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
+    #print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
 
+# # data generation
+#     X_aug, y_aug = moredata.datagen(X_train, y_train, 2000, [30, 5, 5], 2)
+#     print("More data generated", str(len(y_aug))+' training data')
 # preprocess
     X0 = preprocess.eqhGray(X_train)
     X1 = preprocess.eqhGray(X_test)
@@ -69,12 +73,12 @@ if __name__ == '__main__':
     X_Train, X_Val, y_Train, y_Val = train_test_split(X0, y_train, test_size=0.2, random_state=123)
     X_Test, y_Test = shuffle(X1, y_test, random_state=123)
     print("Train, Validation, and Test set ready.")
-    print(len(y_train), len(y_Val), len(y_Test))
+    print(len(y_Train), len(y_Val), len(y_Test))
 
 # Train pipeline
-    EPOCHS = 100
+    EPOCHS = 30
     BATCH_SIZE = 128
-    rate = 0.001
+    rate = 0.0005
     dropoutD=[0.5,0.5] # dropout keep rate for the layers
 
     # placeholders
@@ -83,7 +87,7 @@ if __name__ == '__main__':
     keep_prob = tf.placeholder(tf.float32, (None))
     one_hot_y = tf.one_hot(y, 43)
 
-    logits =  LeNetDrop(x, dropoutD) # LeNet(x) #
+    logits =  miniVGG(x, dropoutD) # LeNet(x) #
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
     loss_operation = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.AdamOptimizer(learning_rate = rate)
