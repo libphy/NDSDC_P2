@@ -3,6 +3,15 @@ This project is part of Udacity SDC course.
 The data is from the German traffic sign dataset [original](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). A processed, pickled dataset is available through the Udacity project repo, but I won't release here for the protection of their course copyrights.
 The goal is to build various models for the traffic signs classification.
 
+#### Key files
+- README.md : explains thought process
+- trainmodel.py : main function for training 
+- moredata.py : generate more data using transformation
+- preprocess.py : preprocessing
+- models.py : various models
+- testmodel.py : test
+- other files : for checking things
+
 ## EDA
 Number of training examples = 39209
 Number of testing examples = 12630
