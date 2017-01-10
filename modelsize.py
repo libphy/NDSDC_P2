@@ -77,6 +77,11 @@ if __name__ == '__main__':
     # Dropout
     conv2m = tf.nn.dropout(conv2m, 0.5)
 
+    # Branching with 1x1 conv
+    conv2r_W = tf.Variable(tf.truncated_normal(shape=(1, 1, conv2m._shape[-1].value, conv2m._shape[-1].value//4), mean = mu, stddev = sigma))
+    conv2r_b = tf.Variable(tf.zeros(conv2m._shape[-1].value//4))
+    conv2r   = tf.nn.conv2d(conv2m, conv2r_W, strides=[1, 1, 1, 1], padding='SAME') + conv2r_b
+
     # Layer 3: Convolutional.
     nf3 = 64
     f3 = 3
@@ -99,6 +104,11 @@ if __name__ == '__main__':
     # Dropout
     conv4m = tf.nn.dropout(conv4m, 0.5)
 
+    # Branching with 1x1 conv
+    conv4r_W = tf.Variable(tf.truncated_normal(shape=(1, 1, conv4m._shape[-1].value,  conv4m._shape[-1].value//2), mean = mu, stddev = sigma))
+    conv4r_b = tf.Variable(tf.zeros(conv4m._shape[-1].value//2))
+    conv4r   = tf.nn.conv2d(conv4m, conv4r_W, strides=[1, 1, 1, 1], padding='SAME') + conv4r_b
+
     # Layer 5: Convolutional.
     nf5 = 128
     f5 = 3
@@ -120,19 +130,25 @@ if __name__ == '__main__':
     conv6m = tf.nn.dropout(conv6m,0.5)
 
     # Flatten.
-    print(flatten(conv2m)._shape,flatten(conv4m)._shape,flatten(conv6m)._shape )
-    fc0   = tf.concat(1,[flatten(conv6m),flatten(conv4m),flatten(conv2m)])
+    flat2 = flatten(conv2r)
+    flat4 = flatten(conv4r)
+    flat6 = flatten(conv6m)
+    fc0   = tf.concat(2,[tf.reshape(flat2,[-1,flat2._shape[-1].value,1]),tf.reshape(flat4,[-1,flat2._shape[-1].value,1]),tf.reshape(flat2,[-1,flat2._shape[-1].value,1])])
 
+    conv7_W = tf.Variable(tf.truncated_normal(shape=(1, 3, 1), mean = mu, stddev = sigma))
+    conv7_b = tf.Variable(tf.zeros(1))
+    conv7   = tf.nn.conv1d(fc0, conv7_W, stride=1, padding='SAME') + conv7_b
+    conv7 = tf.reshape(conv7,[-1, conv7._shape[1].value])
     # Layer 3: Fully Connected.
-    fc1_W = tf.Variable(tf.truncated_normal(shape=(fc0._shape[-1].value, 1024), mean = mu, stddev = sigma))
-    fc1_b = tf.Variable(tf.zeros(1024))
-    fc1   = tf.matmul(fc0, fc1_W) + fc1_b
+    fc1_W = tf.Variable(tf.truncated_normal(shape=(conv7._shape[-1].value, 512), mean = mu, stddev = sigma))
+    fc1_b = tf.Variable(tf.zeros(512))
+    fc1   = tf.matmul(conv7, fc1_W) + fc1_b
     fc1   = tf.nn.dropout(fc1, 0.5)
     # Activation.
     fc1    = tf.nn.relu(fc1)
 
     #Layer 4: Fully Connected. Input = 120. Output = 84.
-    fc2_W  = tf.Variable(tf.truncated_normal(shape=(1024, 128), mean = mu, stddev = sigma))
+    fc2_W  = tf.Variable(tf.truncated_normal(shape=(512, 128), mean = mu, stddev = sigma))
     fc2_b  = tf.Variable(tf.zeros(128))
     fc2    = tf.matmul(fc1, fc2_W) + fc2_b
     fc2   = tf.nn.dropout(fc2, 0.5)

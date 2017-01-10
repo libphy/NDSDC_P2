@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 def transform_image(img,ang_range,shear_range,trans_range):
+    #This function was from internet, but I modified it to fill the blank (with background extrapolation) when transformed.
     '''
     This function transforms images to generate new images.
     The function takes in following arguments,

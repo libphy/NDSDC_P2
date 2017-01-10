@@ -48,7 +48,7 @@ def saveaug(wdir, filename, X, y):
 if __name__ == '__main__':
 # Data import
     wdir = os.getcwd()
-    training_file = wdir+'/data/train_aug_2000_2.p'
+    training_file = wdir+'/data/train_aug_2000_2.p' # To change back to original train data, use train.p
     testing_file = wdir+'/data/test.p'
 
     with open(training_file, mode='rb') as f:
@@ -61,9 +61,11 @@ if __name__ == '__main__':
     print("Import data")
     #print(X_train.shape, y_train.shape, X_test.shape, y_test.shape)
 
+# Uncommenct below to generate data
 # # data generation
 #     X_aug, y_aug = moredata.datagen(X_train, y_train, 2000, [30, 5, 5], 2)
 #     print("More data generated", str(len(y_aug))+' training data')
+
 # preprocess
     X0 = preprocess.eqhGray(X_train)
     X1 = preprocess.eqhGray(X_test)
@@ -80,7 +82,7 @@ if __name__ == '__main__':
     config.gpu_options.allocator_type = 'BFC'
     with tf.Session(config = config) as s:
 
-        EPOCHS = 40
+        EPOCHS = 30
         BATCH_SIZE = 128
         rate = 0.0005
         #dropoutD=[0.5,0.5] # dropout keep rate for the layers
