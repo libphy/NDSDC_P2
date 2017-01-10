@@ -12,3 +12,5 @@ note.md
 *.data-00000-of-00001
 checkpoint
 etc
+*.ods
+*.ods#

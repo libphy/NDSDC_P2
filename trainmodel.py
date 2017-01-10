@@ -20,8 +20,8 @@ def evaluate(X_data, y_data):
     for offset in range(0, num_examples, BATCH_SIZE):
         end = offset + BATCH_SIZE
         batch_x, batch_y = X_data[offset:end], y_data[offset:end]
-        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: np.ones(len(dropoutD))})
-        loss = sess.run(loss_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: np.ones(len(dropoutD))})
+        accuracy = sess.run(accuracy_operation, feed_dict={x: batch_x, y: batch_y})#, keep_prob: np.ones(len(dropoutD))})
+        loss = sess.run(loss_operation, feed_dict={x: batch_x, y: batch_y})#, keep_prob: np.ones(len(dropoutD))})
         total_accuracy += (accuracy * len(batch_x))
         total_loss += (loss * len(batch_x))
     return total_accuracy / num_examples, total_loss / num_examples
@@ -33,8 +33,8 @@ def training(X_data, y_data):
     for offset in range(0, num_examples, BATCH_SIZE):
         end = offset + BATCH_SIZE
         batch_x, batch_y = X_data[offset:end], y_data[offset:end]
-        sess.run(training_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: dropoutD})
-        loss = sess.run(loss_operation, feed_dict={x: batch_x, y: batch_y, keep_prob: np.ones(len(dropoutD))})
+        sess.run(training_operation, feed_dict={x: batch_x, y: batch_y}) #, keep_prob: dropoutD})
+        loss = sess.run(loss_operation, feed_dict={x: batch_x, y: batch_y})#, keep_prob: np.ones(len(dropoutD))})
         total_loss += (loss * len(batch_x))
     return total_loss / num_examples
 
@@ -76,43 +76,47 @@ if __name__ == '__main__':
     print(len(y_Train), len(y_Val), len(y_Test))
 
 # Train pipeline
-    EPOCHS = 30
-    BATCH_SIZE = 128
-    rate = 0.0005
-    dropoutD=[0.5,0.5] # dropout keep rate for the layers
+    config = tf.ConfigProto()
+    config.gpu_options.allocator_type = 'BFC'
+    with tf.Session(config = config) as s:
 
-    # placeholders
-    x = tf.placeholder(tf.float32, (None, 32, 32, X_Train.shape[-1]))
-    y = tf.placeholder(tf.int32, (None))
-    keep_prob = tf.placeholder(tf.float32, (None))
-    one_hot_y = tf.one_hot(y, 43)
+        EPOCHS = 40
+        BATCH_SIZE = 128
+        rate = 0.0005
+        #dropoutD=[0.5,0.5] # dropout keep rate for the layers
 
-    logits =  miniVGG(x, dropoutD) # LeNet(x) #
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
-    loss_operation = tf.reduce_mean(cross_entropy)
-    optimizer = tf.train.AdamOptimizer(learning_rate = rate)
-    training_operation = optimizer.minimize(loss_operation)
+        # placeholders
+        x = tf.placeholder(tf.float32, (None, 32, 32, X_Train.shape[-1]))
+        y = tf.placeholder(tf.int32, (None))
+        keep_prob = tf.placeholder(tf.float32, (None))
+        one_hot_y = tf.one_hot(y, 43)
 
-    # evaluation
-    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(one_hot_y, 1))
-    accuracy_operation = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    saver = tf.train.Saver()
-    print("Graph constructed.")
+        logits =  miniVGG(x) # LeNet(x) #
+        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits, one_hot_y)
+        loss_operation = tf.reduce_mean(cross_entropy)
+        optimizer = tf.train.AdamOptimizer(learning_rate = rate)
+        training_operation = optimizer.minimize(loss_operation)
 
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        num_examples = len(X_Train)
+        # evaluation
+        correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(one_hot_y, 1))
+        accuracy_operation = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+        saver = tf.train.Saver()
+        print("Graph constructed.")
 
-        print("Training...")
-        print()
-        for i in range(EPOCHS):
-            X_Train, y_Train = shuffle(X_Train, y_Train)
-            train_loss = training(X_Train, y_Train)
+        with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
+            num_examples = len(X_Train)
 
-            validation_accuracy, validation_loss = evaluate(X_Val, y_Val)
-            print("EPOCH {} ...".format(i+1))
-            print("Train Loss = {:.3f}".format(train_loss), "Validation Loss = {:.3f}".format(validation_loss), "Validation Accuracy = {:.3f}".format(validation_accuracy))
+            print("Training...")
+            print()
+            for i in range(EPOCHS):
+                X_Train, y_Train = shuffle(X_Train, y_Train)
+                train_loss = training(X_Train, y_Train)
+
+                validation_accuracy, validation_loss = evaluate(X_Val, y_Val)
+                print("EPOCH {} ...".format(i+1))
+                print("Train Loss = {:.3f}".format(train_loss), "Validation Loss = {:.3f}".format(validation_loss), "Validation Accuracy = {:.3f}".format(validation_accuracy))
 
 
-        saver.save(sess, 'model')
-        print("Model saved")
+            saver.save(sess, 'model')
+            print("Model saved")
